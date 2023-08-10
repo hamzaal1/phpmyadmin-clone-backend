@@ -2,28 +2,49 @@ const express = require("express");
 const app = express();
 const PORT = 4000;
 const bodyParser = require('body-parser');
+const cors = require("cors")
 
 const mySQLConnectionMiddleware = require("./middleware/mySQLConnectionMiddleware");
+const corsConfig = require("./config/corsConfig");
 
 // global middleware
+app.use(cors(corsConfig));
 app.use(express.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }))
 app.use(mySQLConnectionMiddleware);
 
+
 app.get("/isConnected", (req, res) => res.json({ status: "ok" }));
+
 app.post("/databases", async (req, res) => {
     const { mysql } = req;
-    try {
-        mysql.query("SELECT schema_name FROM information_schema.schemata;", function (err, result, fields) {
-            if (err) throw res.status(500).json({ error: 'An error occurred' });
-            res.json({ databases: result });
-        });
+    mysql.query("SELECT schema_name FROM information_schema.schemata;", function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ databases: result });
+    });
+    mysql.end();
 
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred' });
-    }
+});
+
+app.post("/databases/add", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`CREATE DATABASE ${req.body.name}`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ message: "table created SuccessFully", status: 1 });
+    });
+    mysql.end();
+
+});
+
+app.post("/databases/delete", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`DROP DATABASE IF EXISTS ${req.body.name};`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ message: "table droped SuccessFully", status: 1 });
+    });
+    mysql.end();
 });
 
 app.listen(process.env.port || PORT, () => {
