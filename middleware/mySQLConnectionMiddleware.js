@@ -12,7 +12,6 @@ const mySQLConnectionMiddleware = (req, res, next) => {
             mysqlConfig.database = req.body.schema_name;
         }
 
-        console.log(mysqlConfig);
         const con = mysql.createConnection(mysqlConfig);
 
         con.connect(err => {
@@ -20,7 +19,6 @@ const mySQLConnectionMiddleware = (req, res, next) => {
                 console.error('Failed to connect to MySQL:', err);
                 return res.status(500).json({ error: 'Failed to connect' });
             }
-
             req.mysql = con;
             next();
         });

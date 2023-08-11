@@ -18,6 +18,8 @@ app.use(mySQLConnectionMiddleware);
 
 app.get("/isConnected", (req, res) => res.json({ status: "ok" }));
 
+// databases api 
+
 app.post("/databases", async (req, res) => {
     const { mysql } = req;
     mysql.query("SELECT schema_name FROM information_schema.schemata;", function (err, result, fields) {
@@ -55,6 +57,35 @@ app.post("/databases/expande", async (req, res) => {
     });
     mysql.end();
 });
+
+
+// tables api 
+app.post("/databases/expande/table", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`DESCRIBE ${req.body.table};`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ table_column: result, status: 1 });
+    });
+    mysql.end();
+});
+
+app.post("/databases/expande/table/shows", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`SELECT * from ${req.body.table};`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ tables_recordes: result, status: 1 });
+    });
+    mysql.end();
+});
+app.post("/databases/expande/table/delete", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`DELETE from ${req.body.table} WHERE id= ${req.body.id};`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        res.json({ message: "deleted successfully", status: 1 });
+    });
+    mysql.end();
+});
+
 
 app.listen(process.env.port || PORT, () => {
     console.log(`server working http://localhost:${process.env.port || PORT}`);
