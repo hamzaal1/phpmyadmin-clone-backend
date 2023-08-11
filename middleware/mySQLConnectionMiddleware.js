@@ -1,26 +1,33 @@
-var mysql = require('mysql');
-const mySQLConnectionMiddleware = async (req, res, next) => {
-    try {
+const mysql = require('mysql');
 
-        const mysqlConfig = {
+const mySQLConnectionMiddleware = (req, res, next) => {
+    try {
+        let mysqlConfig = {
             host: req.body.host,
             user: req.body.username,
             password: req.body.password,
+        };
+
+        if (req.body.schema_name) {
+            mysqlConfig.database = req.body.schema_name;
         }
+
         console.log(mysqlConfig);
         const con = mysql.createConnection(mysqlConfig);
 
-        con.connect(function (err) {
+        con.connect(err => {
             if (err) {
-                console.log(err);
-                res.status(500).json({ error: 'Failed to connect' });
-            } else {
-                req.mysql = con;
-                next();
+                console.error('Failed to connect to MySQL:', err);
+                return res.status(500).json({ error: 'Failed to connect' });
             }
+
+            req.mysql = con;
+            next();
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to establish Mysql connection' });
+        console.error('Failed to establish MySQL connection:', error);
+        res.status(500).json({ error: 'Failed to establish MySQL connection' });
     }
-}
-module.exports = mySQLConnectionMiddleware
+};
+
+module.exports = mySQLConnectionMiddleware;

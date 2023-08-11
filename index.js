@@ -46,6 +46,15 @@ app.post("/databases/delete", async (req, res) => {
     });
     mysql.end();
 });
+app.post("/databases/expande", async (req, res) => {
+    const { mysql } = req;
+    mysql.query(`SHOW TABLES;`, function (err, result, fields) {
+        if (err) res.status(500).json({ error: 'An error occurred' });
+        let tables = result.map((table) => table[`Tables_in_${req.body.schema_name}`])
+        res.json({ tables, status: 1 });
+    });
+    mysql.end();
+});
 
 app.listen(process.env.port || PORT, () => {
     console.log(`server working http://localhost:${process.env.port || PORT}`);
