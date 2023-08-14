@@ -1,5 +1,6 @@
 const whitelist = [
     'http://localhost:5173',
+    'https://phpmyadmin-clone-with-server-auth.vercel.app',
     // 'http://yourfrontenddomain.com'
 ];
 
